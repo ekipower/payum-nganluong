@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="eki.payum.nganluong.api.class">Eki\Payum\Nganluong\Api</parameter>        
+        <parameter key="eki.payum.nganluong.action.capture.class">Eki\Payum\Nganluong\Action\CaptureAction</parameter>
+        <parameter key="eki.payum.nganluong.action.capture_onsite.class">Eki\Payum\Nganluong\Action\CaptureOnsiteAction</parameter>
+        <parameter key="eki.payum.nganluong.action.status.class">Eki\Payum\Nganluong\Action\StatusAction</parameter>
+        <parameter key="eki.payum.nganluong.action.fill_order_details.class">Eki\Payum\Nganluong\Action\FillOrderDetailsAction</parameter>
+        <parameter key="eki.payum.nganluong.action.set_express_checkout.class">Eki\Payum\Nganluong\Action\Api\SetExpressCheckoutAction</parameter>
+        <parameter key="eki.payum.nganluong.action.get_transaction_details.class">Eki\Payum\Nganluong\Action\Api\GetTransactionDetailsAction</parameter>
+    </parameters>
+
+    <services>
+        <service
+            id="eki.payum.nganluong.api.prototype"
+            class="%eki.payum.nganluong.api.class%"
+            abstract="true"
+            public="false"
+        >
+            <argument type="service" id="payum.buzz.client" />
+            <argument type="collection">
+                <!-- It is template service. The real service will be created by NganluongPaymentFactory -->
+            </argument>
+        </service>
+
+        <service
+            id="eki.payum.nganluong.action.capture"
+            class="%eki.payum.nganluong.action.capture.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong.action.fill_order_details"
+            class="%eki.payum.nganluong.action.fill_order_details.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong" />
+            <tag name="payum.action" factory="nganluong_onsite" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong.action.capture_onsite"
+            class="%eki.payum.nganluong.action.capture_onsite.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_onsite" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong.action.status"
+            class="%eki.payum.nganluong.action.status.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong" />
+            <tag name="payum.action" factory="nganluong_onsite" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong.action.set_express_checkout"
+            class="%eki.payum.nganluong.action.set_express_checkout.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong" />
+            <tag name="payum.action" factory="nganluong_onsite" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong.action.get_transaction_details"
+            class="%eki.payum.nganluong.action.get_transaction_details.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong" />
+            <tag name="payum.action" factory="nganluong_onsite" />
+        </service>
+	</services>
+</container>
