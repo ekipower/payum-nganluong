@@ -90,8 +90,31 @@ abstract class BasePaymentFactory extends AbstractPaymentFactory
         $apiDefinition = new DefinitionDecorator('eki.payum.nganluong.api.prototype');
         $apiDefinition->replaceArgument(0, $options);
         $apiDefinition->setPublic(true);
-        $apiId = 'payum.context.'.$contextName.'.api';
+        $apiId = 'eki.payum.context.'.$contextName.'.api';
         $container->setDefinition($apiId, $apiDefinition);
         $paymentDefinition->addMethodCall('addApi', array(new Reference($apiId)));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function addActions(Definition $paymentDefinition, ContainerBuilder $container, $contextName, array $config)
+    {
+		if ( isset($config['sandbox']) && $config['sandbox'] != false )
+		{
+	        $loggerDefinition = new Definition();
+	        $loggerDefinition->setClass('Eki\Payum\Nganluong\Action\LoggerAwareAction');
+			$loggerDefinition->addMethodCall(
+				'setLogger',
+				array(new Reference('logger'))
+			);
+			$loggerActionId = 'payum.'.$contextName.'.nganluong.action.logger_aware';
+	        $container->setDefinition($loggerActionId, $loggerDefinition);
+
+            $paymentDefinition->addMethodCall(
+                'addAction',
+                array(new Reference($loggerActionId), $forcePrepend = true)
+            );
+		}
     }
 }

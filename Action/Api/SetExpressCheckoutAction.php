@@ -10,7 +10,9 @@
 
 namespace Eki\Payum\Nganluong\Action\Api;
 
+use Eki\Payum\Nganluong\Action\Api\BaseApiAwareAction;
 use Eki\Payum\Nganluong\Request\Api\SetExpressCheckout;
+use Eki\Payum\Nganluong\Request\Api\GetPaymentMethod;
 
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
@@ -28,18 +30,26 @@ class SetExpressCheckoutAction extends BaseApiAwareAction
 
         $model = ArrayObject::ensureArrayObject($request->getModel());
 
-        if (null === $model['total_amount']) {
-            throw new LogicException('The "total_amount" must be set.');
-        }
-        if (null === $model['cur_code']) {
-            throw new LogicException('The "cur_code" must be set.');
-        }
-        if (null === $model['order_code']) {
-            throw new LogicException('The "order_code" must be set.');
-        }
-        if (null === $model['payment_method']) {
-            throw new LogicException('The "payment_method" must be set.');
-        }
+/*
+		if ( false == $model->validateNotEmpty( array('payment_method', 'payment_type'), false ) )
+		{
+			try
+			{
+				$this->execute( $paymentInfoRequest = new GetPaymentMethod($model) );
+				$paymentInfo = $paymentInfoRequest->getInfo();
+				$model['payment_method'] = $paymentInfo['payment_method'];
+				$model['payment_type'] = $paymentInfo['payment_type'];
+            } 
+			catch (RequestNotSupportedException $e) {
+                throw new LogicException('Payment info (method, type, ...)) has to be set explicitly or there has to be an action that supports PaymentMethod request.');
+            }
+		}
+*/
+
+		$model['payment_method'] = 'VISA';
+		$model['payment_type'] = 1;
+				
+		$model->validateNotEmpty(array('total_amount', 'cur_code', 'order_code', 'payment_method', 'payment_type'));
 
         $model->replace(
             $this->api->setExpressCheckout((array) $model)

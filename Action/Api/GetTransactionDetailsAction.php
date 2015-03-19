@@ -10,7 +10,9 @@
 
 namespace Eki\Payum\Nganluong\Action\Api;
 
+use Eki\Payum\Nganluong\Action\Api\BaseApiAwareAction;
 use Eki\Payum\Nganluong\Request\Api\GetTransactionDetails;
+use Eki\Payum\Nganluong\Api\TransactionStatus;
 
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\LogicException;
@@ -29,11 +31,11 @@ class GetTransactionDetailsAction extends BaseApiAwareAction
         $model = ArrayObject::ensureArrayObject($request->getModel());
 
         if (false == $model['token']) {
-            throw new LogicException('"token" must be set. Have you run SetExpressCheckoutAction?');
+            throw new \LogicException('"token" must be set. Have you run SetExpressCheckoutAction?');
         }
 
-		$model->replace( 
-			$this->api->getTransactionDetails( array( 'token' => $model['token'] ) ) 
+		$model->replace(
+			$this->api->getTransactionDetails( array('token' => $model['token']) )
 		);
     }
 

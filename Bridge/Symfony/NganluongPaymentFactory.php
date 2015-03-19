@@ -24,12 +24,12 @@ class NganluongPaymentFactory extends BasePaymentFactory
     public function create(ContainerBuilder $container, $contextName, array $config)
     {
         if (false == class_exists('\Eki\Payum\Nganluong\PaymentFactory')) {
-            throw new RuntimeException('Cannot find redsys payment factory class');
+            throw new RuntimeException('Cannot find nganluong payment factory class');
         }
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/Resources/config'));
         $loader->load('nganluong.xml');
-
+		
         return parent::create($container, $contextName, $config);
     }
 

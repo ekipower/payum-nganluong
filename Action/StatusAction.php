@@ -40,28 +40,26 @@ class StatusAction implements ActionInterface, StateInterface
         $state = $model['state'];
 
         if (null === $state ||
-            self::STATE_WAITING === $state
+            StateInterface::STATE_WAITING === $state
         ) {
             $request->markNew();
 
             return;
         }
 
-        if (self::STATE_REPLIED === $state ||
-            self::STATE_NOTIFIED === $state
+        if (StateInterface::STATE_REPLIED === $state ||
+            StateInterface::STATE_NOTIFIED === $state
         ) {
             $request->markPending();
 
             return;
         }
 
-        if (self::STATE_CONFIRMED === $state) {
+        if (StateInterface::STATE_CONFIRMED === $state) {
             $request->markCaptured();
 
             return;
         }
-
-
 
         $request->markFailed();
     }

@@ -21,18 +21,16 @@ class Response extends BaseResponse
         }
 
 		$response = array();
-//			$xml_result = str_replace('&','&amp;', (string)$content);
+		
+		$xml_result = str_replace('&','&amp;', (string)$content);
 		$xml_result = $content;
 		$xmlElement  = simplexml_load_string($xml_result);				
-//			$xmlElement->error_message = $this->getErrorMessage($xmlElement->error_code);
 		
-		foreach($xmlElement as $key => $value)
+		foreach($xmlElement->attributes() as $key => $value)
 		{
-var_dump(array($key=>$value));var_dump("<br />");				
 			$response[$key] = is_object($value) ? $value->__toString() : $value;
 		}
 
         return $response;
-		
     }
 }

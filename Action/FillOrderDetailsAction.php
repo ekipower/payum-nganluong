@@ -43,12 +43,42 @@ class FillOrderDetailsAction implements ActionInterface
         $divisor = pow(10, $order->getCurrencyDigitsAfterDecimalPoint());
 
         $details = $order->getDetails();
+		
         $details['order_code'] = $order->getNumber();
         $details['total_amount'] = $order->getTotalAmount() / $divisor;
-        $details['total_amount'] = $order->getTotalAmount();
         $details['cur_code'] = $order->getCurrencyCode();
+		$details['order_description'] = $order->getDescription();
+		
+		$details['buyer_email'] = $order->getClientEmail();
+
 		// need more, fill later....
 
+/*
+R	order_code
+R	total_amount
+R   cur_code
+
+payment_method
+payment_type
+
+R order_description
+tax_amount
+discount_amount
+fee_shipping
+R return_url
+R cancel_url
+time_limit
+buyer_fullname
+R buyer_email
+buyer_mobile
+buyer_address
+affiliate_code
+total_item
+item_name1
+item_quantity1
+item_amount1
+item_url1
+*/
         $order->setDetails($details);
     }
 

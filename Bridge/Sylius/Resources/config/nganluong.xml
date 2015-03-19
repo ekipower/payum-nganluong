@@ -6,27 +6,29 @@
                                http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="eki.sylius.payum.nganluong.action.capture_payment_using_xxx.class">Eki\Payum\Nganluong\Bridge\Sylius\CapturePaymentUsingXXXAction</parameter>
-        <parameter key="eki.sylius.payum.nganluong.action.notify.class">Eki\Payum\Nganluong\Bridge\Sylius\NotifyAction</parameter>
+        <parameter key="eki.sylius.payum.nganluong.action.get_payment_method.class">Eki\Payum\Nganluong\Bridge\Sylius\GetPaymentMethodAction</parameter>
+        <parameter key="eki.sylius.payum.nganluong.action.capture_payment_using_nganluong.class">Eki\Payum\Nganluong\Bridge\Sylius\CapturePaymentUsingNganluongAction</parameter>
+        <parameter key="eki.sylius.payum.nganluong.action.notify_order.class">Eki\Payum\Nganluong\Bridge\Sylius\NotifyOrderAction</parameter>
     </parameters>
 
     <services>
         <!-- Nganluong -->
-        <service id="eki.sylius.payum.nganluong.action.capture_payment_using_xxx" class="%eki.sylius.payum.nganluong.action.capture_payment_using_xxx.class%" public="false">
+		<!-- Locked temporarily
+        <service id="eki.sylius.payum.nganluong.action.get_payment_method" class="%eki.sylius.payum.nganluong.action.get_payment_method.class%" public="false">
+            <tag name="payum.action" factory="nganluong" />
+        </service>
+		-->
+        <service id="eki.sylius.payum.nganluong.action.capture_payment_using_nganluong" class="%eki.sylius.payum.nganluong.action.capture_payment_using_nganluong.class%" public="false">
             <argument type="service" id="payum.security.token_factory" />
 
             <tag name="payum.action" factory="nganluong" />
-            <tag name="payum.action" factory="nganluong_onsite" />
         </service>
-        <service id="eki.sylius.payum.nganluong.action.notify" class="%eki.sylius.payum.nganluong.action.notify.class%" public="false">
-            <argument type="service" id="sylius.repository.payment" />
+        <service id="eki.sylius.payum.nganluong.action.notify_order" class="%eki.sylius.payum.nganluong.action.notify_order.class%" public="false">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="sylius.manager.payment" />
             <argument type="service" id="sm.factory" />
-            <argument>id</argument>
 
             <tag name="payum.action" factory="nganluong" />
-            <tag name="payum.action" factory="nganluong_onsite" />
         </service>
 
     </services>

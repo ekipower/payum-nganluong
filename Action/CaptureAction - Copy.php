@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the EkiPayumNganluongBundle package.
+ * This file is part of the EkiPayumBundle package.
  *
  * (c) EkiPower <http://ekipower.github.com/>
  *
@@ -24,6 +24,7 @@ use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\LogicException;
 use Payum\Core\Reply\HttpRedirect;
 use Payum\Core\Request\Capture;
+use Payum\Core\Request\Sync;
 use Payum\Core\Request\GetHttpRequest;
 use Payum\Core\Request\ObtainCreditCard;
 use Payum\Core\Exception\UnsupportedApiException;
@@ -38,6 +39,13 @@ class CaptureAction extends PaymentAwareAction implements ApiAwareInterface
      */
     protected $api;
 
+	/**
+	* 
+	* @var Payum\Core\Security\GenericTokenFactoryInterface
+	* 
+	*/
+	protected $tokenFactory;
+    
     /**
      * {@inheritDoc}
      */
@@ -71,10 +79,9 @@ class CaptureAction extends PaymentAwareAction implements ApiAwareInterface
 
         $model = ArrayObject::ensureArrayObject($request->getModel());
 
-        if ( false == $model['token'] ) 
+        if ( !isset($model['token']) || false === $model['token'] ) 
 		{
-			$this->payment->execute(new Log('No token. First....', $this));
-
+/*			
             if (false == $model['return_url'] && $request->getToken()) {
                 $model['return_url'] = $request->getToken()->getTargetUrl();
             }
@@ -82,9 +89,19 @@ class CaptureAction extends PaymentAwareAction implements ApiAwareInterface
             if (false == $model['cancel_url'] && $request->getToken()) {
                 $model['cancel_url'] = $request->getToken()->getTargetUrl();
             }
+*/
+            if (false == $model['return_url'] || false == $model['cancel_url']) 
+			{
+	            $notifyToken = $this->tokenFactory->createNotifyToken(
+	                $request->getToken()->getPaymentName(),
+	                $request->getToken()->getDetails()
+	            );
+				
+                $model['return_url'] = false == $model['return_url'] ? $notifyToken->getTargetUrl() : $model['return_url'];
+                $model['cancel_url'] = false == $model['cancel_url'] ? $notifyToken->getTargetUrl() : $model['cancel_url'];
+            }
 
 			$model['state'] = StateInterface::STATE_WAITING;
-			$this->payment->execute(new Log('Waiting for reply when calling SetExpressCheckout', $this));
             $this->payment->execute(new SetExpressCheckout($model));
 
             if ( isset($model['error_code']) && $model['error_code'] === Errors::ERRCODE_NO_ERROR )
@@ -92,75 +109,71 @@ class CaptureAction extends PaymentAwareAction implements ApiAwareInterface
 		        if (isset($model['checkout_url'])) 
 				{
 					$model['state'] = StateInterface::STATE_REPLIED;
-					$this->payment->execute(new Log('checkout_url='.$model['checkout_url'], $this));
+					$this->payment->execute(new Log('checkout_url='.$model['checkout_url']));
 		            throw new HttpRedirect($model['checkout_url']);
 		        }
 				else
 				{
 					$model['state'] = StateInterface::STATE_ERROR;
-					$this->payment->execute(new Log('No checkout_url returned.', $this));
+					$this->execute(new Log('No checkout_url returned.'));
 				}
             }
-		}
-
+/*			
+			else
+			{
+				$model['state'] = StateInterface::STATE_ERROR;	
+				
+				$errMsg = 'Error from SetExpressCheckout.';
+				$errMsg .= '{error_code='.$model['error_code'].'}';
+				$errMsg .= '{description='.$model['description'].'}';
+				$this->payment->execute(new Log($errMsg));
+			}
+        }
 		else
 		{
-			$this->payment->execute(new Log('Before calling GetTransactionDetails', $this));
-			$this->logAllModel($model);
-			
-	        $copiedModel = new ArrayObject(array(
-	            'token' => $model['token'],
-	        ));
-			
-            $this->payment->execute(new GetTransactionDetails($copiedModel));
-
-			$this->payment->execute(new Log('After calling GetTransactionDetails', $this));
-			$this->logAllModel($copiedModel);
-			
-			if ( $copiedModel['error_code'] === Errors::ERRCODE_NO_ERROR )
+	        $this->payment->execute(new GetTransactionDetails($model));
+	        if ( isset($model['error_code']) && $model['error_code'] === Errors::ERRCODE_NO_ERROR )
 			{
-				$model['bank_code'] = $copiedModel['bank_code'];
-				$model['transaction_id'] = $copiedModel['transaction_id'];
-				$model['transaction_status'] = $copiedModel['transaction_status'];
+				if ( !isset($model['transaction_status']) )
+				{
+					$model['state'] = StateInterface::STATE_ERROR;
+					$this->execute(new Log('GetTransactionDetails has no transaction status.'));
+				}
 				
-				if ( $copiedModel['transaction_status'] == TransactionStatus::PAID )
+				if ( $model['transaction_status'] === TransactionStatus::PAID)
 				{
 					$model['state'] = StateInterface::STATE_CONFIRMED;
-					$this->payment->execute(new Log('Order paid. OK. OK. OK.', $this));
+					$this->execute(new Log('GetTransactionDetails -> Paid.'));
+					
+					return;
 				}
-				else if ( $copiedModel['transaction_status'] == TransactionStatus::NOT_PAID )
-				{
-					$model['state'] = StateInterface::STATE_ERROR;
-					$this->payment->execute(new Log('Payer decided to avoid payment', $this));
-				}
-				else if ( $copiedModel['transaction_status'] == TransactionStatus::PAID_WAITING_FOR_PROCESS )
+
+				if ( $model['transaction_status'] === TransactionStatus::PAID_WAITING_FOR_PROCESS)
 				{
 					$model['state'] = StateInterface::STATE_NOTIFIED;
-					$this->payment->execute(new Log('Payment process notified but not captured.', $this));
+					$this->execute(new Log('GetTransactionDetails -> Waiting for paying.'));
+					
+					return;
 				}
-				else
+				
+				if ( $model['transaction_status'] === TransactionStatus::NOT_PAID)
 				{
 					$model['state'] = StateInterface::STATE_ERROR;
-					$this->payment->execute(new Log('Payment process return OK but transaction status is not invalid. Unknown error !!!', $this));
+					$this->execute(new Log('GetTransactionDetails-> Not paid'));
+					
+					return;
 				}
 			}
 			else
 			{
 				$model['state'] = StateInterface::STATE_ERROR;
-				$this->payment->execute(new Log('Error after calling GetTransactionDetails', $this));
+				$this->execute(new Log('Unknown error when checking payment.'));
+
+				return;
 			}
 		}
+*/  
     }
-	
-	private function logAllModel($model)
-	{
-		$msg = '';
-		foreach($model as $key => $value)
-		{
-			$msg .= '  '.$key.'='.$value;
-		}
-		$this->payment->execute(new Log($msg, $this));
-	}
 
     /**
      * {@inheritDoc}

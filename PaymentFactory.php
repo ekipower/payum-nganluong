@@ -10,6 +10,8 @@
 
 namespace Eki\Payum\Nganluong;
 
+use Eki\Payum\Nganluong\Api;
+
 use Eki\Payum\Nganluong\Action\CaptureAction;
 use Eki\Payum\Nganluong\Action\FillOrderDetailsAction;
 use Eki\Payum\Nganluong\Action\StatusAction;
@@ -18,7 +20,9 @@ use Eki\Payum\Nganluong\Action\Api\SetExpressCheckoutAction;
 use Eki\Payum\Nganluong\Action\Api\GetTransactionDetailsAction;
 
 use Payum\Core\Action\ExecuteSameRequestWithModelDetailsAction;
+use Payum\Core\Action\CaptureOrderAction;
 use Payum\Core\Action\GetHttpRequestAction;
+use Payum\Core\Action\NotifyOrderAction;
 use Payum\Core\Payment;
 use Payum\Core\Extension\EndlessCycleDetectorExtension;
 
@@ -41,6 +45,8 @@ abstract class PaymentFactory
         $payment->addAction(new GetTransactionDetailsAction);
 
         $payment->addAction(new CaptureAction);
+        $payment->addAction(new CaptureOrderAction);
+        $payment->addAction(new NotifyOrderAction);
         $payment->addAction(new FillOrderDetailsAction);
         $payment->addAction(new StatusAction);
         $payment->addAction(new ExecuteSameRequestWithModelDetailsAction);
