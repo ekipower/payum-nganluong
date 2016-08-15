@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="eki.payum.nganluong_nl.api.class">Eki\Payum\Nganluong\Api</parameter>        
+        <parameter key="eki.payum.nganluong_nl.action.api.set_express_checkout.class">Eki\Payum\Nganluong\Action\Api\SetExpressCheckoutAction</parameter>
+        <parameter key="eki.payum.nganluong_nl.action.api.get_transaction_details.class">Eki\Payum\Nganluong\Action\Api\GetTransactionDetailsAction</parameter>
+        <parameter key="eki.payum.nganluong_nl.action.capture.class">Eki\Payum\Nganluong\Action\CaptureAction</parameter>
+        <parameter key="eki.payum.nganluong_nl.action.status.class">Eki\Payum\Nganluong\Action\StatusAction</parameter>
+        <parameter key="eki.payum.nganluong_nl.action.fill_order_details.class">Eki\Payum\Nganluong\Action\FillOrderDetailsAction</parameter>
+    </parameters>
+
+    <services>
+        <service
+            id="eki.payum.nganluong_nl.api.prototype"
+            class="%eki.payum.nganluong_nl.api.class%"
+            abstract="true"
+            public="false"
+        >
+            <argument type="collection">
+                <!-- It is template service. The real service will be created by NganluongPaymentVisaFactory -->
+            </argument>
+            <argument type="service" id="payum.buzz.client" />
+			<call method="setLogger">
+				<argument type="service" id="logger" />
+			</call>
+        </service>
+
+        <service
+            id="eki.payum.nganluong_nl.action.api.set_express_checkout"
+            class="%eki.payum.nganluong_nl.action.api.set_express_checkout.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_nl" />
+			<call method="setLogger">
+				<argument type="service" id="logger" />
+			</call>
+        </service>
+
+        <service
+            id="eki.payum.nganluong_nl.action.api.get_transaction_details"
+            class="%eki.payum.nganluong_nl.action.api.get_transaction_details.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_nl" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong_nl.action.capture"
+            class="%eki.payum.nganluong_nl.action.capture.class%"
+            public="false"
+        >
+			<tag name="payum.action" factory="nganluong_nl" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong_nl.action.status"
+            class="%eki.payum.nganluong_nl.action.status.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_nl" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong_nl.action.fill_order_details"
+            class="%eki.payum.nganluong_nl.action.fill_order_details.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_nl" />
+        </service>
+
+	</services>
+</container>

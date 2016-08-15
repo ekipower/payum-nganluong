@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="eki.payum.nganluong_atm.api.class">Eki\Payum\Nganluong\Api</parameter>        
+        <parameter key="eki.payum.nganluong_atm.action.api.set_express_checkout.class">Eki\Payum\Nganluong\Action\Api\SetExpressCheckoutAction</parameter>
+        <parameter key="eki.payum.nganluong_atm.action.api.get_transaction_details.class">Eki\Payum\Nganluong\Action\Api\GetTransactionDetailsAction</parameter>
+        <parameter key="eki.payum.nganluong_atm.action.determine_bank.class">Eki\Payum\Nganluong\Action\ATMOnline\DetermineBankAction</parameter>
+        <parameter key="eki.payum.nganluong_atm.action.capture.class">Eki\Payum\Nganluong\Action\ATMOnline\CaptureAction</parameter>
+        <parameter key="eki.payum.nganluong_atm.action.status.class">Eki\Payum\Nganluong\Action\StatusAction</parameter>
+        <parameter key="eki.payum.nganluong_atm.action.fill_order_details.class">Eki\Payum\Nganluong\Action\FillOrderDetailsAction</parameter>
+        <!--parameter key="eki.nganluong.payum.template.determine_bank">EkiPayumNganluongBundle:Action:determineBank.html.twig</parameter-->
+        <!--parameter key="eki.nganluong.payum.form.type.determine_bank">eki_nganluong_bank_list</parameter-->
+    </parameters>
+
+    <services>
+        <service
+            id="eki.payum.nganluong_atm.api.prototype"
+            class="%eki.payum.nganluong_atm.api.class%"
+            abstract="true"
+            public="false"
+        >
+            <argument type="collection">
+                <!-- It is template service. The real service will be created by NganluongPaymentVisaFactory -->
+            </argument>
+            <argument type="service" id="payum.buzz.client" />
+			<call method="setLogger">
+				<argument type="service" id="logger" />
+			</call>
+        </service>
+
+        <service
+            id="eki.payum.nganluong_atm.action.api.set_express_checkout"
+            class="%eki.payum.nganluong_atm.action.api.set_express_checkout.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_atm" />
+			<call method="setLogger">
+				<argument type="service" id="logger" />
+			</call>
+        </service>
+
+        <service
+            id="eki.payum.nganluong_atm.action.api.get_transaction_details"
+            class="%eki.payum.nganluong_atm.action.api.get_transaction_details.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_atm" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong_atm.action.determine_bank"
+            class="%eki.payum.nganluong_atm.action.determine_bank.class%"
+            public="false"
+        >
+            <argument type="service" id="form.factory" />
+            <argument>%eki.nganluong.payum.template.determine_bank%</argument>
+			<argument>%eki.nganluong.payum.form.type.determine_bank%</argument>
+            <call method="setRequest">
+                <argument type="service" id="request" on-invalid="null" strict="false" />
+            </call>
+			<tag name="payum.action" factory="nganluong_atm" />
+        </service>
+		
+        <service
+            id="eki.payum.nganluong_atm.action.capture"
+            class="%eki.payum.nganluong_atm.action.capture.class%"
+            public="false"
+        >
+			<tag name="payum.action" factory="nganluong_atm" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong_atm.action.status"
+            class="%eki.payum.nganluong_atm.action.status.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_atm" />
+        </service>
+
+        <service
+            id="eki.payum.nganluong_atm.action.fill_order_details"
+            class="%eki.payum.nganluong_atm.action.fill_order_details.class%"
+            public="false"
+        >
+            <tag name="payum.action" factory="nganluong_atm" />
+        </service>
+
+	</services>
+</container>

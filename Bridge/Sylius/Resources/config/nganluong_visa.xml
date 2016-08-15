@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+                               http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="eki.sylius.payum.nganluong_visa.action.capture_payment_using_nganluong.class">Eki\Payum\Nganluong\Bridge\Sylius\CapturePaymentUsingNganluongAction</parameter>
+        <parameter key="eki.sylius.payum.nganluong_visa.action.notify_order.class">Eki\Payum\Nganluong\Bridge\Sylius\NotifyOrderAction</parameter>
+        <parameter key="eki.sylius.payum.nganluong_visa.action.get_payment_method.class">Eki\Payum\Nganluong\Bridge\Sylius\GetPaymentMethodAction</parameter>
+    </parameters>
+
+    <services>
+        <!-- Nganluong -->
+        <service 
+			id="eki.sylius.payum.nganluong_visa.action.capture_payment_using_nganluong" 
+			class="%eki.sylius.payum.nganluong_visa.action.capture_payment_using_nganluong.class%" 
+			public="false"
+		>
+            <tag name="payum.action" factory="nganluong_visa" prepend="true" />
+        </service>
+
+        <service 
+			id="eki.sylius.payum.nganluong_visa.action.notify_order" 
+			class="%eki.sylius.payum.nganluong_visa.action.notify_order.class%" 
+			public="false"
+		>
+            <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="sylius.manager.payment" />
+            <argument type="service" id="sm.factory" />
+
+            <tag name="payum.action" factory="nganluong_visa" />
+        </service>
+
+        <service 
+			id="eki.sylius.payum.nganluong_visa.action.get_payment_method" 
+			class="%eki.sylius.payum.nganluong_visa.action.get_payment_method.class%" 
+			public="false"
+		>
+            <tag name="payum.action" factory="nganluong_visa" />
+        </service>
+    </services>
+
+</container>
